@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Pomodoro Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .goal-display {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .timer-display {
+            font-size: 4em;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            margin: 20px 0;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-play { background: #4CAF50; color: white; }
+        .btn-pause { background: #FF9800; color: white; }
+        .btn-stop { background: #f44336; color: white; }
+        .btn-stats { background: rgba(33, 150, 243, 0.8); color: white; }
+        .btn-chat { background: rgba(156, 39, 176, 0.8); color: white; }
+        .btn-color { background: rgba(255, 193, 7, 0.8); color: white; }
+
+        .content-area {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            width: 350px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .chat-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            max-height: 400px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            background: rgba(76, 175, 80, 0.3);
+            margin-left: 20px;
+        }
+
+        .message.bot {
+            background: rgba(33, 150, 243, 0.3);
+            margin-right: 20px;
+        }
+
+        .message.other-user {
+            background: rgba(156, 39, 176, 0.3);
+        }
+
+        .message-author {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1em;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-send {
+            padding: 12px 25px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: rgba(20, 20, 40, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .close {
+            float: right;
+            font-size: 2em;
+            cursor: pointer;
+            color: #f44336;
+        }
+
+        .stats-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .stats-table th, .stats-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-table tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .color-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .color-option {
+            padding: 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .color-option:hover {
+            transform: scale(1.05);
+            border-color: white;
+        }
+
+        .setup-form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1em;
+        }
+
+        .online-users {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .online-user {
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(76, 175, 80, 0.3);
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 30px;
+            background: rgba(76, 175, 80, 0.95);
+            color: white;
+            border-radius: 10px;
+            font-weight: bold;
+            animation: slideIn 0.5s;
+            z-index: 2000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .content-area {
+                flex-direction: column;
+            }
+            .chat-container {
+                width: 100%;
+                max-height: 300px;
+            }
+            .timer-display {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="container">
+        <div class="header">
+            <div class="goal-display" id="goalDisplay">🎯 Set your goal to begin</div>
+            <div class="timer-display" id="timerDisplay">00:00</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%">0m</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-play" onclick="startTimer()">▶ Start</button>
+            <button class="btn-pause" onclick="pauseTimer()">⏸ Pause</button>
+            <button class="btn-stop" onclick="stopTimer()">⏹ Stop</button>
+            <button class="btn-stats" onclick="showStats()">📊 Stats</button>
+            <button class="btn-chat" onclick="toggleChat()">💬 Chat</button>
+            <button class="btn-color" onclick="showColorPicker()">🎨 Colors</button>
+        </div>
+
+        <div class="content-area">
+            <div class="main-content"></div>
+            
+            <div class="chat-container" id="chatContainer" style="display: none;">
+                <div class="chat-header">💬 Chat</div>
+                
+                <div class="chat-tabs">
+                    <button class="tab active" onclick="switchTab('wisdom')">🧘 Wisdom</button>
+                    <button class="tab" onclick="switchTab('users')">👥 Users</button>
+                </div>
+
+                <div id="onlineUsers" class="online-users" style="display: none;">
+                    <strong>Online Users:</strong>
+                    <div id="usersList"></div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages"></div>
+                
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleChatKeyPress(event)">
+                    <button class="btn-send" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Modal -->
+    <div id="setupModal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <h2>🌟 Welcome to Cosmic Pomodoro</h2>
+            <div class="setup-form">
+                <div class="form-group">
+                    <label>Your Name:</label>
+                    <input type="text" id="userName" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label>Distance Goal (meters):</label>
+                    <input type="number" id="distanceGoal" placeholder="e.g., 250 (= 25 minutes)" value="250">
+                    <small style="display: block; margin-top: 5px; color: rgba(255,255,255,0.7);">10 meters = 1 minute</small>
+                </div>
+                <button class="btn-play" onclick="startSession()" style="width: 100%; margin-top: 20px;">Start Your Journey</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('statsModal')">&times;</span>
+            <h2>📊 Statistics Leaderboard</h2>
+            <table class="stats-table" id="statsTable"></table>
+        </div>
+    </div>
+
+    <!-- Color Picker Modal -->
+    <div id="colorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('colorModal')">&times;</span>
+            <h2>🎨 Choose Your Space</h2>
+            <div class="color-selector">
+                <div class="color-option" style="background: #000428; background: linear-gradient(135deg, #000428 0%, #004e92 100%);" onclick="setColor('deepSpace')">Deep Space</div>
+                <div class="color-option" style="background: #4A00E0; background: linear-gradient(135deg, #4A00E0 0%, #8E2DE2 100%);" onclick="setColor('nebula')">Nebula</div>
+                <div class="color-option" style="background: #0F2027; background: linear-gradient(135deg, #0F2027 0%, #2C5364 100%);" onclick="setColor('cosmic')">Cosmic</div>
+                <div class="color-option" style="background: #FF416C; background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);" onclick="setColor('solar')">Solar</div>
+                <div class="color-option" style="background: #000000; background: linear-gradient(135deg, #000000 0%, #434343 100%);" onclick="setColor('void')">Void</div>
+                <div class="color-option" style="background: #2E3192; background: linear-gradient(135deg, #2E3192 0%, #1BFFFF 100%);" onclick="setColor('aurora')">Aurora</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Philosophical quotes database
+        const QUOTES = {
+            iro: [
+                "Pride is not the opposite of shame, but its source. True humility is the only antidote to shame.",
+                "It is important to draw wisdom from many different places. If we take it from only one place, it becomes rigid and stale.",
+                "While it is always best to believe in oneself, a little help from others can be a great blessing.",
+                "You have light and peace inside of you. If you let it out, you can change the world around you.",
+            ],
+            heroic: [
+                "The only way to do great work is to love what you do.",
+                "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+                "Fall seven times, stand up eight.",
+                "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+            ],
+            bronte: [
+                "I am no bird; and no net ensnares me; I am a free human being with an independent will.",
+                "I would always rather be happy than dignified.",
+                "Whatever our souls are made of, his and mine are the same.",
+            ],
+            kant: [
+                "We are not rich by what we possess but by what we can do without.",
+                "Science is organized knowledge. Wisdom is organized life.",
+                "Two things fill the mind with ever-increasing wonder and awe: the starry heavens above me and the moral law within me.",
+            ],
+            lyrics: [
+                "What if you fly?",
+                "Every little thing is gonna be alright",
+                "I get knocked down, but I get up again",
+                "Here comes the sun, and I say it's all right",
+            ]
+        };
+
+        const BREAK_ADVICES = [
+            "Take a 5-minute walk to refresh your mind.",
+            "Stretch your body and relax your shoulders.",
+            "Drink some water and stay hydrated.",
+            "Take deep breaths and practice mindfulness.",
+            "Do a quick exercise - jumping jacks or push-ups!",
+        ];
+
+        // App state
+        let state = {
+            userName: '',
+            distanceGoal: 0,
+            timeGoal: 0,
+            elapsed: 0,
+            running: false,
+            paused: false,
+            currentTab: 'wisdom',
+            stats: JSON.parse(localStorage.getItem('pomodoroStats') || '{}'),
+            onlineUsers: {},
+            starOffset: 0
+        };
+
+        // Canvas star field
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let colorScheme = 'deepSpace';
+
+        const colorSchemes = {
+            deepSpace: { bg: ['#000428', '#004e92'], stars: '#ffffff' },
+            nebula: { bg: ['#4A00E0', '#8E2DE2'], stars: '#ffd700' },
+            cosmic: { bg: ['#0F2027', '#2C5364'], stars: '#00ffff' },
+            solar: { bg: ['#FF416C', '#FF4B2B'], stars: '#ffff00' },
+            void: { bg: ['#000000', '#434343'], stars: '#888888' },
+            aurora: { bg: ['#2E3192', '#1BFFFF'], stars: '#00ff88' }
+        };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5 + 0.1
+                });
+            }
+        }
+
+        function drawStars() {
+            const scheme = colorSchemes[colorScheme];
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, scheme.bg[0]);
+            gradient.addColorStop(1, scheme.bg[1]);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = scheme.stars;
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                star.x += star.speed;
+                if (star.x > canvas.width) star.x = 0;
+            });
+
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        drawStars();
+
+        // Timer functions
+        let timerInterval;
+
+        function startSession() {
+            const name = document.getElementById('userName').value.trim() || 'Guest';
+            const distance = parseInt(document.getElementById('distanceGoal').value) || 250;
+            
+            state.userName = name;
+            state.distanceGoal = distance;
+            state.timeGoal = (distance / 10) * 60;
+            state.elapsed = 0;
+            
+            document.getElementById('goalDisplay').textContent = 
+                `🎯 Goal: ${distance}m (${Math.round(distance/10)}min) | User: ${name}`;
+            
+            closeModal('setupModal');
+            showNotification(`Welcome ${name}! Let's begin your journey.`);
+        }
+
+        function startTimer() {
+            if (!state.userName) {
+                document.getElementById('setupModal').style.display = 'flex';
+                return;
+            }
+
+            if (!state.running) {
+                state.running = true;
+                state.paused = false;
+                timerInterval = setInterval(updateTimer, 100);
+            }
+        }
+
+        function pauseTimer() {
+            state.paused = !state.paused;
+        }
+
+        function stopTimer() {
+            state.running = false;
+            state.paused = false;
+            clearInterval(timerInterval);
+            saveSession(false);
+        }
+
+        function updateTimer() {
+            if (!state.paused && state.running) {
+                state.elapsed += 0.1;
+
+                const mins = Math.floor(state.elapsed / 60);
+                const secs = Math.floor(state.elapsed % 60);
+                document.getElementById('timerDisplay').textContent = 
+                    `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+                const progress = Math.min((state.elapsed / state.timeGoal) * 100, 100);
+                const distanceCovered = (state.elapsed / 60) * 10;
+                
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = Math.round(distanceCovered) + 'm';
+
+                if (state.elapsed >= state.timeGoal) {
+                    completeTimer();
+                }
+
+                // Auto-save every 30 seconds
+                if (Math.floor(state.elapsed) % 30 === 0) {
+                    saveSession(false);
+                }
+            }
+        }
+
+        function completeTimer() {
+            state.running = false;
+            clearInterval(timerInterval);
+            saveSession(true);
+
+            const advice = BREAK_ADVICES[Math.floor(Math.random() * BREAK_ADVICES.length)];
+            showNotification(`🎉 Goal Complete! ${advice}`);
+
+            // Show wisdom
+            const allQuotes = Object.values(QUOTES).flat();
+            const wisdom = allQuotes[Math.floor(Math.random() * allQuotes.length)];
+            setTimeout(() => {
+                addBotMessage(wisdom);
+                document.getElementById('chatContainer').style.display = 'flex';
+            }, 2000);
+        }
+
+        function saveSession(completed) {
+            if (!state.userName) return;
+
+            if (!state.stats[state.userName]) {
+                state.stats[state.userName] = {
+                    sessions: [],
+                    totalDistance: 0,
+                    totalTime: 0,
+                    completedSessions: 0
+                };
+            }
+
+            const distance = (state.elapsed / 60) * 10;
+            const userData = state.stats[state.userName];
+            
+            userData.sessions.push({
+                date: new Date().toISOString(),
+                distance: distance,
+                duration: state.elapsed,
+                completed: completed
+            });
+            
+            userData.totalDistance += distance;
+            userData.totalTime += state.elapsed;
+            if (completed) userData.completedSessions++;
+
+            localStorage.setItem('pomodoroStats', JSON.stringify(state.stats));
+        }
+
+        function showStats() {
+            const table = document.getElementById('statsTable');
+            table.innerHTML = `
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Distance</th>
+                    <th>Time</th>
+                    <th>Sessions</th>
+                    <th>Completed</th>
+                </tr>
+            `;
+
+            const sorted = Object.entries(state.stats)
+                .sort((a, b) => b[1].totalDistance - a[1].totalDistance);
+
+            sorted.forEach(([name, data], index) => {
+                const hours = Math.floor(data.totalTime / 3600);
+                const mins = Math.floor((data.totalTime % 3600) / 60);
+                const row = table.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${name}</td>
+                    <td>${Math.round(data.totalDistance)}m</td>
+                    <td>${hours}h ${mins}m</td>
+                    <td>${data.sessions.length}</td>
+                    <td>${data.completedSessions || 0}</td>
+                `;
+            });
+
+            document.getElementById('statsModal').style.display = 'flex';
+        }
+
+        // Chat functions
+        function toggleChat() {
+            const chat = document.getElementById('chatContainer');
+            chat.style.display = chat.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function switchTab(tab) {
+            state.currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const onlineUsers = document.getElementById('onlineUsers');
+            onlineUsers.style.display = tab === 'users' ? 'block' : 'none';
+
+            if (tab === 'users') {
+                updateOnlineUsers();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addUserMessage(message);
+            input.value = '';
+
+            if (state.currentTab === 'wisdom') {
+                setTimeout(() => {
+                    const response = getBotResponse(message);
+                    addBotMessage(response);
+                }, 500);
+            } else {
+                // Simulate multiplayer chat
+                addUserChatMessage(state.userName, message);
+                
+                // Simulate other users (in real app, this would be WebSocket)
+                setTimeout(() => {
+                    const responses = [
+                        "Keep going! You're doing great!",
+                        "What's your goal today?",
+                        "I'm on my 3rd pomodoro!",
+                        "Remember to stay hydrated!",
+                    ];
+                    const randomUser = 'User' + Math.floor(Math.random() * 100);
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addOtherUserMessage(randomUser, randomResponse);
+                }, 2000);
+            }
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function getBotResponse(message) {
+            const msg = message.toLowerCase();
+            let category = 'heroic';
+
+            if (msg.includes('iro') || msg.includes('tea') || msg.includes('wisdom')) category = 'iro';
+            else if (msg.includes('bronte') || msg.includes('love') || msg.includes('soul')) category = 'bronte';
+            else if (msg.includes('kant') || msg.includes('moral') || msg.includes('reason')) category = 'kant';
+            else if (msg.includes('song') || msg.includes('music') || msg.includes('lyric')) category = 'lyrics';
+
+            const quotes = QUOTES[category];
+            return quotes[Math.floor(Math.random() * quotes.length)];
+        }
+
+        function addUserMessage(message) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message user';
+            div.innerHTML = `<div class="message-author">You</div>${message}`;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addBotMessage(message) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message bot';
+            div.innerHTML = `<div class="message-author">Wisdom Bot</div>${message}`;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addUserChatMessage(user, message) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message user';
+            div.innerHTML = `<div class="message-author">${user}</div>${message}`;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addOtherUserMessage(user, message) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message other-user';
+            div.innerHTML = `<div class="message-author">${user}</div>${message}`;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function updateOnlineUsers() {
+            // Simulate online users (in real app, this would be from server)
+            const usersList = document.getElementById('usersList');
+            const simulatedUsers = [
+                { name: state.userName, distance: Math.round((state.elapsed / 60) * 10) },
+                { name: 'Alex', distance: 340 },
+                { name: 'Sarah', distance: 280 },
+                { name: 'Mike', distance: 150 }
+            ];
+
+            usersList.innerHTML = simulatedUsers.map(user => `
+                <div class="online-user">
+                    <span>👤 ${user.name}</span>
+                    <span>${user.distance}m</span>
+                </div>
+            `).join('');
+        }
+
+        // Color picker
+        function showColorPicker() {
+            document.getElementById('colorModal').style.display = 'flex';
+        }
+
+        function setColor(color) {
+            colorScheme = color;
+            closeModal('colorModal');
+            showNotification(`Space theme changed to ${color}!`);
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showNotification(message) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = message;
+            document.body.appendChild(notif);
+
+            setTimeout(() => {
+                notif.remove();
+            }, 4000);
+        }
+
+        // Close modals on background click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
