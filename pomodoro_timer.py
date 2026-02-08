@@ -224,7 +224,7 @@ class PomodoroTimer:
         timer_display = f"⏱️  {mins:02d}:{secs:02d}"
         
         bar_color = COLORS['green'] if progress < 1.0 else COLORS['solar']
-        bar = f"{bar_color}[{'█' * filled}{'░' * (progress_bar_width - filled)}]{COLORS[self.bg_color]} {distance_covered:.0f}m"
+        bar = f"{bar_color}[{'🟩' * filled}{'░' * (progress_bar_width - filled)}]{COLORS[self.bg_color]} {distance_covered:.0f}m"
         
         if self.running and not self.paused:
             status = f"{COLORS['green']}▶ RUNNING{COLORS[self.bg_color]}"
