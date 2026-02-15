@@ -31,8 +31,6 @@ QUOTES = {
         "You have light and peace inside of you. If you let it out, you can change the world around you.",
         "Understanding yourself is the key to understanding others.",
         "The best tea tastes delicious whether it comes in a porcelain pot or a tin cup.",
-    ],
-    'heroic': [
         "The only way to do great work is to love what you do.",
         "Success is not final, failure is not fatal: it is the courage to continue that counts.",
         "Do not go where the path may lead, go instead where there is no path and leave a trail.",
@@ -42,9 +40,6 @@ QUOTES = {
         "I am not afraid of storms, for I am learning how to sail my ship.",
         "The future belongs to those who believe in the beauty of their dreams.",
         "Fall seven times, stand up eight.",
-        "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
-    ],
-    'bronte': [
         "I am no bird; and no net ensnares me; I am a free human being with an independent will.",
         "I would always rather be happy than dignified.",
         "The soul, fortunately, has an interpreter - often an unconscious but still a faithful interpreter - in the eye.",
@@ -53,8 +48,6 @@ QUOTES = {
         "Whatever our souls are made of, his and mine are the same.",
         "Be with me always—take any form—drive me mad! only do not leave me in this abyss, where I cannot find you!",
         "He's more myself than I am. Whatever our souls are made of, his and mine are the same.",
-    ],
-    'kant': [
         "We are not rich by what we possess but by what we can do without.",
         "Science is organized knowledge. Wisdom is organized life.",
         "He who is cruel to animals becomes hard also in his dealings with men.",
@@ -63,8 +56,6 @@ QUOTES = {
         "All our knowledge begins with the senses, proceeds then to the understanding, and ends with reason.",
         "Two things fill the mind with ever-increasing wonder and awe: the starry heavens above me and the moral law within me.",
         "Have patience awhile; slanders are not long-lived. Truth is the child of time; erelong she shall appear to vindicate thee.",
-    ],
-    'lyrics': [
         "What if you fly? - from 'Brave'",
         "Every little thing is gonna be alright - Three Little Birds",
         "I get knocked down, but I get up again - Tubthumping",
@@ -103,8 +94,8 @@ COLORS = {
 
 class PomodoroTimer:
     def __init__(self):
-        self.distance_goal = 0
-        self.time_goal = 0
+        self.distance_goal = 0meters
+        self.time_goal = 0min
         self.elapsed = 0
         self.running = False
         self.paused = False
