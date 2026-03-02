@@ -1,134 +1,171 @@
 #!/usr/bin/env python3
-import time, os, sys, threading, json, termios, tty, subprocess, random, datetime
+import time, os, sys, threading, json, termios, tty, random, datetime, math
 from pathlib import Path
 
+# --- 2026 NEON DREAM PALETTE ---
+def get_color(code): return f"\033[38;5;{code}m"
+
 COLORS = {
-    "cosmic": "\033[38;5;141m", "solar": "\033[38;5;220m",
-    "pink": "\033[38;5;213m", "reset": "\033[0m", "cyan": "\033[36m",
-    "white": "\033[97m", "void": "\033[90m"
+    "reset": "\033[0m", "hide": "\033[?25l", "show": "\033[?25h",
+    "pink": get_color(218), "blush": get_color(211), "mint": get_color(121),
+    "sky": get_color(153), "lavender": get_color(183), "gold": get_color(220),
+    "white": "\033[97m", "void": get_color(234)
 }
 
-QUOTES = {
-    'iro': ['Tea is just hot leaf juice!', 'Hope is something you give yourself.'],
-    'mj': ['Heal the world.', 'Lies run sprints, truth runs marathons.'],
-    'lana': ['Live fast, die young.', 'I believe in the person I want to become.'],
-    'bronte': ['I am no bird; and no net ensnares me.', 'I would always rather be happy than dignified.'],
-    'kant': ['Science is organized knowledge.', 'The starry heavens above me and the moral law within me.'],
-    'heroic': ['Marcus Aurelius: The impediment to action advances action.', 'Churchill: Success is not final.'],
-    'lyrics': ['Bowie: Ground Control to Major Tom.', 'Billie: You should see me in a crown.'],
-    'vibe': ['Main Character Energy detected. 📈', 'No cap, your productivity is skyrocketing.']
-}
+RAINBOW = [197, 203, 209, 215, 221, 227, 191, 155, 119, 83, 47, 41, 35, 29]
 
-class PomodoroTimer:
+QUOTES = [
+    "Kirby: (っˆڡˆς) Poyo! Your focus is sparkling!",
+    "Iroh: Protection and power are overrated. Choose focus.",
+    "MJ: If you want to make the world better, start with this task.",
+    "Lana: Dream hard, work harder, stay pink.",
+    "Waddle Dee: ( •⌄• ) I'm charting your progress, Pilot!"
+]
+
+class CosmicKirbyTerminal:
     def __init__(self):
         self.user_name = 'Cosmic Kirbs'
         self.history_file = Path('/workspaces/timetodime2/session_history.json')
         self.goal_mins = 25
         self.elapsed = 0
         self.paused = True
-        self.mood = 'Hype'
-        self.in_menu = False
-        self.star_offset = 0
+        self.stars = []
+        self.frame = 0
+        self.state = "FLIGHT"
+        self.history = []
+        self.load_history()
 
-    def clear_screen(self):
-        os.system('clear' if os.name != 'nt' else 'cls')
-
-    def draw_stars(self, width, height):
-        star_chars = ['·', '∙', '•', '*', '✧']
-        grid = [[' ' for _ in range(width)] for _ in range(height)]
-        random.seed(42)
-        for _ in range((width * height) // 18):
-            x, y = random.randint(0, width-1), random.randint(0, height-1)
-            char = random.choice(star_chars)
-            # VERTICAL FALL LOGIC: Shift y instead of x
-            new_y = (y + self.star_offset) % height
-            grid[new_y][x] = f"{COLORS['void']}{char}{COLORS['reset']}"
-        return grid
-
-    def chat_menu(self):
-        self.in_menu = True
-        self.clear_screen()
-        print(f"{COLORS['pink']}💬 CATALOG: iro, mj, lana, bronte, kant, heroic, lyrics, vibe, or back{COLORS['reset']}")
-        while True:
-            cmd = input(f"{self.user_name} > ").lower().strip()
-            if cmd == 'back': break
-            print(f"{COLORS['cyan']}Reflect: {random.choice(QUOTES.get(cmd, ['Poyo!']))}{COLORS['reset']}")
-        self.in_menu = False
-
-    def stats_menu(self):
-        self.in_menu = True
-        self.clear_screen()
-        print(f"{COLORS['solar']}📊 MISSION LOG: {self.user_name.upper()}{COLORS['reset']}")
+    def load_history(self):
         if self.history_file.exists():
-            with open(self.history_file, 'r') as f:
-                history = json.load(f)
-                for entry in history[-10:]:
-                    print(f" √ {entry['timestamp'][:16]} | {entry['duration_mins']}m")
-        input("\nPress Enter...")
-        self.in_menu = False
+            try:
+                with open(self.history_file, 'r') as f: self.history = json.load(f)
+            except: self.history = []
 
-    def draw_ui(self):
-        if self.in_menu: return
-        try: cols, rows = os.get_terminal_size()
-        except: cols, rows = 80, 24
+    def save_log(self):
+        log = {"pilot": self.user_name, "date": str(datetime.datetime.now())[:16], "mins": self.elapsed // 60}
+        self.history.append(log)
+        with open(self.history_file, 'w') as f: json.dump(self.history, f, indent=4)
+
+    def draw_bubble_menu(self, title, lines):
+        os.system('clear')
+        width = 60
+        print(f"\n{COLORS['pink']}  ╭{'─'*(width-2)}╮")
+        print(f"  │ {COLORS['gold']}{title.center(width-4)}{COLORS['pink']} │")
+        print(f"  ├{'─'*(width-2)}┤")
+        for l in lines:
+            print(f"  │ {COLORS['white']}{l.ljust(width-4)}{COLORS['pink']} │")
+        print(f"  ╰{'─'*(width-2)}╯{COLORS['reset']}")
+
+    def comms_menu(self):
+        self.draw_bubble_menu("📡 COMMS RELAY", ["", random.choice(QUOTES), "", "[Any key to return]"])
+        self.wait_for_key()
+        self.state = "FLIGHT"
+
+    def history_menu(self):
+        lines = ["Last 5 Missions:"]
+        for entry in self.history[-5:]:
+            lines.append(f"• {entry['date']} | {entry['mins']}m")
+        lines.append("")
+        lines.append("[Any key to return]")
+        self.draw_bubble_menu("📊 FLIGHT ARCHIVES", lines)
+        self.wait_for_key()
+        self.state = "FLIGHT"
+
+    def settings_menu(self):
+        self.draw_bubble_menu("⚙️ SHIP SETTINGS", [f"1. Name: {self.user_name}", f"2. Timer: {self.goal_mins}m", "", "[1/2] Change | [B] Back"])
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        try:
+            tty.setcbreak(fd)
+            c = sys.stdin.read(1).lower()
+            if c == '1': 
+                termios.tcsetattr(fd, termios.TCSADRAIN, old)
+                self.user_name = input("\n New Pilot Name: ")
+            elif c == '2': self.goal_mins = 50 if self.goal_mins == 25 else 90 if self.goal_mins == 50 else 25
+        finally: termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        self.state = "FLIGHT"
+
+    def wait_for_key(self):
+        fd = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        try:
+            tty.setcbreak(fd)
+            sys.stdin.read(1)
+        finally: termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+    def draw_flight(self):
+        cols, rows = os.get_terminal_size()
+        if not self.stars: self.stars = [{'x': random.uniform(-1, 1), 'y': random.uniform(-1, 1), 'z': random.uniform(0.1, 1.5), 'speed': 0.025} for _ in range(55)]
         
-        grid = self.draw_stars(cols, rows - 2)
+        buf = ["\033[H"]
+        screen = [[' ' for _ in range(cols)] for _ in range(rows)]
+        cx, cy = cols // 2, rows // 2
+
+        # Star Logic
+        for s in self.stars:
+            s['z'] -= s['speed']
+            if s['z'] <= 0: s['z'] = 1.5; s['x'], s['y'] = random.uniform(-1, 1), random.uniform(-1, 1)
+            sx, sy = int(cx + (s['x'] / s['z']) * cx), int(cy + (s['y'] / s['z']) * cy)
+            if 0 <= sx < cols and 0 <= sy < rows:
+                color = COLORS['void'] if s['z'] > 1.0 else COLORS['sky'] if s['z'] > 0.5 else COLORS['white']
+                screen[sy][sx] = f"{color}·{COLORS['reset']}"
+
+        # Kirby Logic
+        kx = int(cx - 5 + math.sin(self.frame * 0.1) * 15)
+        ky = int(rows // 2 + math.cos(self.frame * 0.1) * 2)
+        eye = "^" if (self.frame // 10) % 3 == 0 else "◕"
+        face = f"{COLORS['pink']}⎛{COLORS['blush']}·{COLORS['pink']}{eye}v{eye}{COLORS['blush']}·{COLORS['pink']}⎞"
+        
+        # Progress Logic
         mins, secs = divmod(self.elapsed, 60)
-        progress = min(self.elapsed / (self.goal_mins * 60), 1.0)
-        bar_width = cols - 20
-        filled = int(bar_width * progress)
-        bar = f"[{'█' * filled}{'░' * (bar_width - filled)}]"
+        prog = min(self.elapsed / (self.goal_mins * 60), 1.0)
+        bar_w = cols - 24
+        filled = int(bar_w * prog)
+        bar = f"{COLORS['gold']}★{'━'*filled}{COLORS['lavender']}{'┈'*(bar_w-filled)}☇{COLORS['reset']}"
 
-        ui_lines = [
-            (1, f" 🚀 FALLING THROUGH THE STARS | PILOT: {self.user_name} ", COLORS['cosmic']),
-            (3, f" ⏱️  TIMER: {mins:02d}:{secs:02d} / {self.goal_mins}:00 ", COLORS['solar']),
-            (5, f" 🔋 PROGRESS: {bar} {int(progress*100)}% ", COLORS['cyan']),
-            (rows-5, f" <( \" )>  *poyo* ", COLORS['pink'])
-        ]
-        
-        for r, text, color in ui_lines:
-            for i, char in enumerate(text):
-                if i+2 < cols and r < rows-2: grid[r][i+2] = f"{color}{char}{COLORS['reset']}"
+        # Render Header
+        buf.append(f"{COLORS['pink']}❤ {self.user_name} ❤{COLORS['reset']}".center(cols + 10) + "\n\n")
+        for r in range(rows - 10): buf.append("".join(screen[r+2]) + "\n")
+        buf.append(f"\033[{ky};{kx}H{face}\n")
+        buf.append(f"\n {bar}\n")
+        buf.append(f" {COLORS['mint']}{mins:02d}:{secs:02d} / {self.goal_mins}:00{COLORS['reset']}".center(cols+10) + "\n")
+        buf.append(f"{COLORS['sky']}[Space] Nap | [C] Comms | [H] Log | [S] Set | [Q] Land{COLORS['reset']}".center(cols+10))
 
-        self.clear_screen()
-        for row in grid: print("".join(row))
-        print(f"{COLORS['white']}[Space] Pause | [C] Chat | [S] Stats | [M] Music | [Q] Quit & Log{COLORS['reset']}", end="")
+        sys.stdout.write("".join(buf))
         sys.stdout.flush()
 
     def run(self):
+        print(COLORS['hide'])
         self.paused = False
         def listen():
             fd = sys.stdin.fileno()
             while True:
-                if not self.in_menu:
-                    old = termios.tcgetattr(fd)
-                    try:
-                        tty.setcbreak(fd)
-                        key = sys.stdin.read(1).lower()
-                        if key == ' ': self.paused = not self.paused
-                        elif key == 'c': termios.tcsetattr(fd, termios.TCSADRAIN, old); self.chat_menu()
-                        elif key == 's': termios.tcsetattr(fd, termios.TCSADRAIN, old); self.stats_menu()
-                        elif key == 'm' or key == 'q':
-                            with open('music_signal.txt', 'w') as f: f.write('toggle')
-                            if key == 'q':
-                                log = {"pilot": self.user_name, "timestamp": str(datetime.datetime.now()), "duration_mins": self.elapsed // 60}
-                                history = []
-                                if self.history_file.exists():
-                                    with open(self.history_file, 'r') as f: history = json.load(f)
-                                history.append(log)
-                                with open(self.history_file, 'w') as f: json.dump(history, f, indent=4)
-                                os._exit(0)
-                    finally: termios.tcsetattr(fd, termios.TCSADRAIN, old)
-                time.sleep(0.1)
+                old = termios.tcgetattr(fd)
+                try:
+                    tty.setcbreak(fd)
+                    k = sys.stdin.read(1).lower()
+                    if k == ' ': self.paused = not self.paused
+                    elif k == 'c': self.state = "COMMS"
+                    elif k == 'h': self.state = "STATS"
+                    elif k == 's': self.state = "SETTINGS"
+                    elif k == 'q':
+                        self.save_log()
+                        with open('music_signal.txt', 'w') as f: f.write('toggle')
+                        print(COLORS['show'])
+                        os._exit(0)
+                finally: termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
         threading.Thread(target=listen, daemon=True).start()
         while True:
-            if not self.paused and not self.in_menu:
-                self.elapsed += 1
-                self.star_offset = (self.star_offset + 1) % 1000
-            self.draw_ui()
-            time.sleep(1)
+            if self.state == "FLIGHT":
+                if not self.paused: self.elapsed += 1
+                self.frame += 1
+                self.draw_flight()
+            elif self.state == "COMMS": self.comms_menu()
+            elif self.state == "STATS": self.history_menu()
+            elif self.state == "SETTINGS": self.settings_menu()
+            time.sleep(0.05)
 
 if __name__ == "__main__":
-    app = PomodoroTimer()
+    app = CosmicKirbyTerminal()
     app.run()
