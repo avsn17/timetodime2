@@ -407,18 +407,24 @@ class PomodoroTimer:
         print('★' * 15)
         curr_mood = getattr(self, 'mood', 'Hype')
         curr_int = getattr(self, 'remind_interval', '10')
-        print(f'[1] Hydration Interval (Current: {curr_int}m)')
-        print(f'[2] Kirby Mood: {curr_mood}')
-        print(f'[3] Reset Session Count')
-        print(f'[4] Exit Settings')
+        print(f'
+🎶 Music: {state}')')
+        print(f'
+🎶 Music: {state}')
+        print(f'
+🎶 Music: {state}')
+        print(f'
+🎶 Music: {state}')
         
         choice = input('\nSelect: ')
         if choice == '1':
             self.remind_interval = input('Enter minutes: ')
-            print(f'<( " )> Interval updated to {self.remind_interval}m!')
+            print(f'
+🎶 Music: {state}')> Interval updated to {self.remind_interval}m!')
         elif choice == '2':
             self.mood = 'Calm' if curr_mood == 'Hype' else 'Hype'
-            print(f'<( ^.^ )> Mood switched to {self.mood}!')
+            print(f'
+🎶 Music: {state}')> Mood switched to {self.mood}!')
         elif choice == '3':
             self.session_count = 0
             print('🔄 Session count reset.')
