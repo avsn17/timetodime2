@@ -399,32 +399,37 @@ class PomodoroTimer:
     
     
     
-    
-    
-    
     def open_settings(self):
-        print('
+        import termios, sys
+        # Reset terminal so input() works
+        old_settings = termios.tcgetattr(sys.stdin)
+        try:
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+            print('
 ' + '★' * 15)
-        print('🛠️ KIRBY CONFIG [A]')
-        print('★' * 15)
-        curr_mood = getattr(self, 'mood', 'Hype')
-        curr_int = getattr(self, 'remind_interval', '10')
-        print(f'[1] Hydration Interval (Current: {curr_int}m)')
-        print(f'[2] Kirby Mood: {curr_mood}')
-        print(f'[3] Reset Session Count')
-        print(f'[4] Exit Settings')
-        
-        choice = input('
+            print('🛠️ KIRBY CONFIG [A]')
+            print('★' * 15)
+            curr_mood = getattr(self, 'mood', 'Hype')
+            curr_int = getattr(self, 'remind_interval', '10')
+            print(f'[1] Hydration Interval (Current: {curr_int}m)')
+            print(f'[2] Kirby Mood: {curr_mood}')
+            print(f'[3] Reset Session Count')
+            print(f'[4] Exit Settings')
+            
+            choice = input('
 Select: ')
-        if choice == '1':
-            self.remind_interval = input('Enter minutes: ')
-            print(f'<( " )> Interval updated to {self.remind_interval}m!')
-        elif choice == '2':
-            self.mood = 'Calm' if curr_mood == 'Hype' else 'Hype'
-            print(f'<( ^.^ )> Mood switched to {self.mood}!')
-        elif choice == '3':
-            self.session_count = 0
-            print('🔄 Session count reset.')
+            if choice == '1':
+                self.remind_interval = input('Enter minutes: ')
+                print(f'<( " )> Interval updated to {self.remind_interval}m!')
+            elif choice == '2':
+                self.mood = 'Calm' if curr_mood == 'Hype' else 'Hype'
+                print(f'<( ^.^ )> Mood switched to {self.mood}!')
+            elif choice == '3':
+                self.session_count = 0
+                print('🔄 Session count reset.')
+        finally:
+            # Mode will be reset by the caller (run loop)
+            pass
 
 
     def run(self):
@@ -469,10 +474,13 @@ Select: ')
                     
                     
                     
+                    
                     if key == ' ':
                         self.paused = not self.paused
                     elif key.lower() == 'a':
+                        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
                         self.open_settings()
+                        tty.setcbreak(sys.stdin.fileno())
                     elif key.lower() == 'm':
                         self.music_playing = not getattr(self, 'music_playing', False)
                         state = '▶️ PLAYING' if self.music_playing else '⏸️ PAUSED'
@@ -481,8 +489,11 @@ Select: ')
                         with open('music_signal.txt', 'w') as f_sig:
                             f_sig.write('toggle' if self.music_playing else 'pause')
                     elif key.lower() == 's':
+                        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
                         self.show_stats()
+                        tty.setcbreak(sys.stdin.fileno())
                     elif key.lower() == 'n':
+
 
 
                         distance_covered = (self.elapsed / 60) * METERS_PER_MINUTE
