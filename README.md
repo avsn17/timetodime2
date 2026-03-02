@@ -49,6 +49,4 @@ open pomodoro_web.html
 
 🌟 **May your productivity journey be guided by wisdom, timetodime2!** 🌟
 
-[links]
-
-(https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcjgxNXlsdDh1bnFtNGpweHN3d2JhbXU4cjl3a21ka3g3eW54emppbiZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/ulUbC9aP9O8GAii3DY/giphy.gif)
+![alt text](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWxmcGQyaHRjZXIxYWZ4cmx3aTFrbnBidnFkY2lqYmNsdmo4ZjRqMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/ulUbC9aP9O8GAii3DY/giphy.gif)
