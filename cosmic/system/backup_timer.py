@@ -273,7 +273,7 @@ class PomodoroTimer:
             
             print(''.join(line))
         
-        controls = "[Space] Pause | [N] New | [S] Stats | [A] Kirby Config | [C] Chat | [Q] Quit"
+        controls = "SPACE=pause | B=back | Q=quit | C=chat | S=stats | O=color | N=new"
         print(controls[:cols] + COLORS['reset'])
         
         sys.stdout.flush()
