@@ -24,7 +24,16 @@
 
         #canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
 
-        /* Confetti & Dance */
+        /* Wellness CSS */
+        .wellness-toast {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 175, 204, 0.9); color: #471212;
+            padding: 15px 30px; border-radius: 50px; border: 3px solid #fff;
+            font-weight: bold; z-index: 2000; animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 20px var(--cosmic-glow);
+        }
+        @keyframes popUp { from { bottom: -50px; opacity: 0; } to { bottom: 100px; opacity: 1; } }
+
         .confetti {
             position: fixed; width: 10px; height: 10px; 
             background-color: var(--kirby-pink);
@@ -278,6 +287,38 @@
             }, 500);
         }
 
+        
+        const HEALTH_TIPS = [
+            '<( " )> POYO! Drink some water! Stay hydrated, Pilot.',
+            '<( o_o )> Time to STRETCH! Reach for the stars!',
+            '<( ^.^ )> Do a quick BEND. Keep that spine cosmic!',
+            '<( >.< )> Look away from the screen for 20 seconds.'
+        ];
+
+        function triggerWellness() {
+            const tip = HEALTH_TIPS[Math.floor(Math.random() * HEALTH_TIPS.length)];
+            const toast = document.createElement('div');
+            toast.className = 'wellness-toast';
+            toast.innerHTML = tip;
+            document.body.appendChild(toast);
+            
+            // Kirby Sprite reaction
+            const original = document.getElementById('kirbySprite').innerText;
+            document.getElementById('kirbySprite').innerText = '<( ! )>';
+            
+            setTimeout(() => { 
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+                document.getElementById('kirbySprite').innerText = original;
+            }, 5000);
+        }
+
+        let wellnessInterval;
+        function startWellnessCheck() {
+            // Remind every 10 minutes (600000ms)
+            wellnessInterval = setInterval(triggerWellness, 600000);
+        }
+
         // Timer Logic
         let timeLeft = 1500, timerId = null;
         function updateUI() {
@@ -289,7 +330,7 @@
         }
 
         function startTimer() { 
-            if(timerId) return; 
+            if(timerId) return; startWellnessCheck(); 
             document.getElementById('audioPlayer').play().then(() => document.getElementById('audioPlayer').pause()); // Unlock audio
             timerId = setInterval(() => {
                 if(timeLeft > 0) { timeLeft--; updateUI(); }
@@ -305,7 +346,7 @@
                 }
             }, 1000);
         }
-        function pauseTimer() { clearInterval(timerId); timerId = null; }
+        function pauseTimer() { clearInterval(timerId); timerId = null; clearInterval(wellnessInterval); }
         function resetTimer() { pauseTimer(); timeLeft = 1500; updateUI(); }
         function confirmEntry() { document.getElementById('setupModal').style.display = 'none'; }
 
