@@ -18,55 +18,7 @@ DATA_FILE = Path.home() / '.pomodoro_stats.json'
 METERS_PER_MINUTE = 10
 
 # Philosophical Quotes
-QUOTES = {
-    'wisdom': [
-        'The journey is the reward.', 'Be like water, my friend.', 'Focus on the step, not the mountain.',
-        'Silence is a source of great strength.', 'He who has a why to live can bear almost any how.'
-    ],
-    'heroic': [
-        'Success is not final, failure is not fatal.', 'Fortune favors the brave.', 'I can do this all day.',
-        'With great power comes great responsibility.', 'Hard times create strong men.'
-    ],
-    'iro': [
-        'While it is always best to believe in oneself, a little help can be a blessing.',
-        'Sharing tea with a fascinating stranger is one of lifes true delights.',
-        'Hope is something you give yourself. That is the meaning of inner strength.'
-    ],
-    'bronte': [
-        'I am no bird; and no net ensnares me.', 'I would always rather be happy than dignified.',
-        'The soul that sees beauty may sometimes walk alone.'
-    ],
-    'kant': [
-        'Two things fill the mind with wonder: the starry heavens and the moral law.',
-        'Seek not the favor of the multitude; it is seldom got by honest means.',
-        'Science is organized knowledge. Wisdom is organized life.'
-    ],
-    'lyrics': [
-        'MJ: If you want to make the world a better place, take a look at yourself and make a change.',
-        'MJ: Speed demon, minding my own business. Speedin on the highway of life.',
-        'Lana: Will you still love me when I am no longer young and beautiful?',
-        'Lana: Heaven is a place on earth with you.',
-        'Lana: Summertime sadness, I just wanted you to know that baby you are the best.',
-        'Bee Gees: Whether you are a brother or whether you are a mother, you are stayin alive.',
-        'Bee Gees: Night fever, night fever! We know how to do it.',
-        'CAS: I am a dreamer, and you are the dream.',
-        'CAS: K. - I am always thinking of you.',
-        'Billie: I am the bad guy, duh.',
-        'Billie: Ocean eyes - I have never fallen from quite this high.',
-        'Billie: You should see me in a crown.',
-        'Bowie: Ground Control to Major Tom, commencing countdown.'
-    ],
-    'kirby': [
-        '<( " )> Poyo! You are doing amazing, Cosmic Kirbs!',
-        '<( o_o )> Focus mode: MAXIMUM PINK POWER.',
-        '(> ^_^ )> <3 Sending positive vibes to the cockpit!'
-    ],
-    'vibe': [
-        'Main Character Energy detected. 📈', 'No cap, your productivity is skyrocketing.',
-        'Vibe check: ABSOLUTE LEGEND.', 'Big brain moves only.'
-    ],
-    'back': ['Returning to the cockpit...', 'Ready for ignition.', 'Focus mode: Reactivated.']
-}
+QUOTES = {'iro': ['Tea is just hot leaf juice!', 'Hope is something you give yourself. That is the meaning of inner strength.', 'Protection and power are overrated. I think you are very wise to choose happiness and love.'], 'mj': ['Heal the world, make it a better place.', 'Lies run sprints, but the truth runs marathons.', 'In a world filled with hate, we must still dare to hope.', 'If you enter this world knowing you are loved and you leave this world knowing the same, then everything that happens in between can be dealt with.'], 'lana': ['Live fast, die young, be wild and have fun.', 'I believe in the person I want to become.', 'Being brave means knowing that when you fail, you don’t fail forever.', 'Who are you? Are you in touch with all of your darkest fantasies?'], 'bronte': ['I am no bird; and no net ensnares me: I am a free human being with an independent will.', 'I would always rather be happy than dignified.', 'The soul, fortunately, has an interpreter - often an unconscious but still a faithful interpreter - in the eye.'], 'kant': ['Science is organized knowledge. Wisdom is organized life.', 'Act only according to that maxim whereby you can at the same time will that it should become a universal law.', 'Two things fill the mind with ever new and increasing admiration and awe: the starry heavens above me and the moral law within me.'], 'heroic': ['Marcus Aurelius: The impediment to action advances action. What stands in the way becomes the way.', 'Churchill: Success is not final, failure is not fatal: it is the courage to continue that counts.', 'Seneca: Luck is what happens when preparation meets opportunity.', 'Leonidas: Molon Labe (Come and take them).', 'Rumi: Do not be satisfied with stories, how things have gone with others. Unfold your own myth.'], 'lyrics': ['Bowie: Ground Control to Major Tom, commencing countdown.', 'Billie: You should see me in a crown.', 'CAS: K. - I am always thinking of you.', 'Bee Gees: Whether you are a brother or a mother, you are stayin alive.', 'Beatles: In the end, the love you take is equal to the love you make.'], 'vibe': ['Main Character Energy detected. 📈', 'Vibe check: ABSOLUTE LEGEND.', 'No cap, your productivity is skyrocketing.', 'Big brain moves only. Let is cook.']}
 
 BREAK_ADVICES = [
     "Take a 5-minute walk to refresh your mind.",
