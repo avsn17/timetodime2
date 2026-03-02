@@ -400,11 +400,13 @@ class PomodoroTimer:
     
     
     
+    
     def open_settings(self):
         import termios, sys
-        # Reset terminal so input() works
+        # Save current state to restore later
         old_settings = termios.tcgetattr(sys.stdin)
         try:
+            # Switch to 'cooked' mode so input() works
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
             print('
 ' + '★' * 15)
@@ -429,6 +431,7 @@ Select: ')
                 self.session_count = 0
                 print('🔄 Session count reset.')
         finally:
+            # Caller handles resetting back to cbreak
             pass
 
 
@@ -481,6 +484,7 @@ Select: ')
                         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
                         self.open_settings()
                         tty.setcbreak(sys.stdin.fileno())
+                    
                     
                     elif key.lower() == 'm':
                         self.music_playing = not getattr(self, 'music_playing', False)
