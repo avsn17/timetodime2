@@ -5,19 +5,18 @@ from pathlib import Path
 COLORS = {
     "cosmic": "\033[38;5;141m", "solar": "\033[38;5;220m",
     "pink": "\033[38;5;213m", "reset": "\033[0m", "cyan": "\033[36m",
-    "green": "\033[92m", "red": "\033[91m"
+    "green": "\033[92m", "white": "\033[97m"
 }
 
-# THE UNIVERSAL CATALOG: 2026 Edition
 QUOTES = {
-    'iro': ['Tea is just hot leaf juice!', 'Hope is something you give yourself.', 'Protection and power are overrated.'],
-    'mj': ['Heal the world, make it a better place.', 'Lies run sprints, but the truth runs marathons.', 'In a world filled with hate, we must still dare to hope.'],
-    'lana': ['Live fast, die young, be wild and have fun.', 'I believe in the person I want to become.', 'Being brave means knowing that when you fail, you don’t fail forever.'],
-    'bronte': ['I am no bird; and no net ensnares me.', 'I would always rather be happy than dignified.', 'The soul has an interpreter in the eye.'],
-    'kant': ['Science is organized knowledge. Wisdom is organized life.', 'Two things fill the mind with wonder: the starry heavens and the moral law.', 'Act only according to that maxim...'],
-    'heroic': ['Marcus Aurelius: The impediment to action advances action.', 'Churchill: Success is not final, failure is not fatal.', 'Seneca: Luck is what happens when preparation meets opportunity.', 'Leonidas: Molon Labe.'],
-    'lyrics': ['Bowie: Ground Control to Major Tom.', 'Billie: You should see me in a crown.', 'CAS: K. - I am always thinking of you.', 'Bee Gees: Stayin alive.'],
-    'vibe': ['Main Character Energy detected. 📈', 'Vibe check: ABSOLUTE LEGEND.', 'No cap, your productivity is skyrocketing.']
+    'iro': ['Tea is just hot leaf juice!', 'Hope is something you give yourself.'],
+    'mj': ['Heal the world.', 'Lies run sprints, truth runs marathons.'],
+    'lana': ['Live fast, die young.', 'I believe in the person I want to become.'],
+    'bronte': ['I am no bird; and no net ensnares me.', 'I would always rather be happy than dignified.'],
+    'kant': ['Science is organized knowledge.', 'The starry heavens above me and the moral law within me.'],
+    'heroic': ['Marcus Aurelius: The impediment to action advances action.', 'Churchill: Success is not final.'],
+    'lyrics': ['Bowie: Ground Control to Major Tom.', 'Billie: You should see me in a crown.'],
+    'vibe': ['Main Character Energy detected. 📈', 'No cap, your productivity is skyrocketing.']
 }
 
 class PomodoroTimer:
@@ -27,27 +26,23 @@ class PomodoroTimer:
         self.elapsed = 0
         self.paused = True
         self.mood = 'Hype'
-        self.remind_interval = 10
         self.in_menu = False
+        self.star_offset = 0
 
     def clear_screen(self):
         os.system('clear' if os.name != 'nt' else 'cls')
 
-    def save_log(self, completed=True):
-        entry = {
-            "pilot": self.user_name, 
-            "timestamp": str(datetime.datetime.now()), 
-            "duration_mins": self.elapsed // 60, 
-            "mood": self.mood, 
-            "status": "Finished" if completed else "Aborted"
-        }
-        history = []
-        if self.history_file.exists():
-            with open(self.history_file, 'r') as f:
-                try: history = json.load(f)
-                except: pass
-        history.append(entry)
-        with open(self.history_file, 'w') as f: json.dump(history, f, indent=4)
+    def draw_stars(self, width, height):
+        star_chars = ['·', '∙', '•', '*', '✧']
+        grid = [[' ' for _ in range(width)] for _ in range(height)]
+        random.seed(42) # Fixed seed for stable star positions
+        for _ in range((width * height) // 25):
+            x, y = random.randint(0, width-1), random.randint(0, height-1)
+            char = random.choice(star_chars)
+            # Shift stars based on elapsed time
+            new_x = (x - self.star_offset) % width
+            grid[y][new_x] = f"{COLORS['white']}{char}{COLORS['reset']}"
+        return grid
 
     def chat_menu(self):
         self.in_menu = True
@@ -56,24 +51,7 @@ class PomodoroTimer:
         while True:
             cmd = input(f"{self.user_name} > ").lower().strip()
             if cmd == 'back': break
-            if cmd in QUOTES:
-                print(f"{COLORS['cyan']}Reflect: {random.choice(QUOTES[cmd])}{COLORS['reset']}")
-            else:
-                print("Poyo! (Try: heroic, kant, or mj)")
-        self.in_menu = False
-
-    def settings_menu(self):
-        self.in_menu = True
-        self.clear_screen()
-        print(f"{COLORS['cosmic']}🛠️ CONFIGURATION{COLORS['reset']}")
-        print(f"[1] Hydration Reminder: {self.remind_interval}m")
-        print(f"[2] Pilot Mood: {self.mood}")
-        print(f"[3] Back")
-        choice = input("\nSelect: ")
-        if choice == '1': 
-            try: self.remind_interval = int(input("New Interval (mins): "))
-            except: pass
-        elif choice == '2': self.mood = "Calm" if self.mood == "Hype" else "Hype"
+            print(f"{COLORS['cyan']}Reflect: {random.choice(QUOTES.get(cmd, ['Poyo!']))}{COLORS['reset']}")
         self.in_menu = False
 
     def stats_menu(self):
@@ -83,61 +61,59 @@ class PomodoroTimer:
         if self.history_file.exists():
             with open(self.history_file, 'r') as f:
                 history = json.load(f)
-                for entry in history[-10:]:
-                    print(f" {COLORS['green']}√{COLORS['reset']} {entry['timestamp'][:16]} | {entry['duration_mins']}m | {entry['mood']}")
-        else: print("No flight data recorded.")
-        input("\nPress Enter to return...")
+                for entry in history[-8:]:
+                    print(f" {COLORS['green']}√{COLORS['reset']} {entry['timestamp'][:16]} | {entry['duration_mins']}m")
+        input("\nPress Enter...")
         self.in_menu = False
 
     def draw_ui(self):
         if self.in_menu: return
-        self.clear_screen()
+        try: cols, rows = os.get_terminal_size()
+        except: cols, rows = 80, 24
+        
+        grid = self.draw_stars(cols, rows - 1)
         mins, secs = divmod(self.elapsed, 60)
-        print(f"{COLORS['cosmic']}🚀 COSMIC MISSION | PILOT: {self.user_name}{COLORS['reset']}")
-        print(f"{COLORS['solar']}TIME: {mins:02d}:{secs:02d} | MOOD: {self.mood}{COLORS['reset']}")
-        # Animated Kirby
-        print("\n" + " " * (self.elapsed % 30) + "<( \" )> *poyo*")
-        print("-" * 55)
-        print(f"{COLORS['cyan']}[Space] Pause | [C] Chat | [A] Config | [S] Stats | [M] Music | [Q] Quit{COLORS['reset']}")
+        
+        # Overlay UI text onto the star grid
+        header = f" 🚀 COSMIC MISSION | PILOT: {self.user_name} "
+        timer = f" TIME: {mins:02d}:{secs:02d} | MOOD: {self.mood} "
+        kirby = "<( \" )> *poyo*"
+        
+        for i, char in enumerate(header): grid[1][i+2] = f"{COLORS['cosmic']}{char}{COLORS['reset']}"
+        for i, char in enumerate(timer): grid[3][i+2] = f"{COLORS['solar']}{char}{COLORS['reset']}"
+        
+        k_pos = (self.elapsed % (cols - 15)) + 2
+        for i, char in enumerate(kirby): grid[6][k_pos+i] = f"{COLORS['pink']}{char}{COLORS['reset']}"
+        
+        self.clear_screen()
+        for row in grid: print("".join(row))
+        print(f"{COLORS['cyan']}[Space] Pause | [C] Chat | [S] Stats | [M] Music | [Q] Quit{COLORS['reset']}", end="")
+        sys.stdout.flush()
 
     def run(self):
-        self.clear_screen()
         self.paused = False
-        
         def listen():
             fd = sys.stdin.fileno()
             while True:
                 if not self.in_menu:
-                    old_settings = termios.tcgetattr(fd)
+                    old = termios.tcgetattr(fd)
                     try:
                         tty.setcbreak(fd)
                         key = sys.stdin.read(1).lower()
                         if key == ' ': self.paused = not self.paused
-                        elif key == 'c': 
-                            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-                            self.chat_menu()
-                        elif key == 'a': 
-                            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-                            self.settings_menu()
-                        elif key == 's': 
-                            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-                            self.stats_menu()
+                        elif key == 'c': termios.tcsetattr(fd, termios.TCSADRAIN, old); self.chat_menu()
+                        elif key == 's': termios.tcsetattr(fd, termios.TCSADRAIN, old); self.stats_menu()
                         elif key == 'm' or key == 'q':
-                            if key == 'q': self.save_log()
-                            try:
-                                with open('music_signal.txt', 'w') as f: f.write('toggle')
-                            except: pass
+                            with open('music_signal.txt', 'w') as f: f.write('toggle')
                             if key == 'q': os._exit(0)
-                    finally: termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+                    finally: termios.tcsetattr(fd, termios.TCSADRAIN, old)
                 time.sleep(0.1)
 
         threading.Thread(target=listen, daemon=True).start()
-
         while True:
             if not self.paused and not self.in_menu:
                 self.elapsed += 1
-                if self.elapsed % (self.remind_interval * 60) == 0:
-                    subprocess.run(['notify-send', 'KIRBY', '💧 Hydrate!'], stderr=subprocess.DEVNULL)
+                self.star_offset = (self.star_offset + 1) % 1000
             self.draw_ui()
             time.sleep(1)
 
