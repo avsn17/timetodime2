@@ -398,13 +398,16 @@ class PomodoroTimer:
         self.timer_thread.start()
     
     
+    
     def open_settings(self):
         print('
-' + '★'*15)
+' + '★' * 15)
         print('🛠️ KIRBY CONFIG [A]')
-        print('★'*15)
-        print(f'[1] Hydration Interval (Current: 10m)')
-        print(f'[2] Kirby Mood: {self.mood if hasattr(self, "mood") else "Hype"}')
+        print('★' * 15)
+        current_mood = getattr(self, 'mood', 'Hype')
+        current_interval = getattr(self, 'remind_interval', '10')
+        print(f'[1] Hydration Interval (Current: {current_interval}m)')
+        print(f'[2] Kirby Mood: {current_mood}')
         print(f'[3] Reset Session Count')
         print(f'[4] Exit Settings')
         
@@ -414,10 +417,13 @@ Select: ')
             self.remind_interval = input('Enter minutes: ')
             print(f'<( " )> Interval updated to {self.remind_interval}m!')
         elif choice == '2':
-            self.mood = 'Calm' if getattr(self, 'mood', 'Hype') == 'Hype' else 'Hype'
+            self.mood = 'Calm' if current_mood == 'Hype' else 'Hype'
             print(f'<( ^.^ )> Mood switched to {self.mood}!')
+        elif choice == '3':
+            self.session_count = 0
+            print('🔄 Session count reset to zero.')
 
-    def run(self):
+def run(self):
         """Main application loop"""
         self.clear_screen()
         print(f"{COLORS['solar']}🌟 Welcome to Cosmic Pomodoro Timer 🌟{COLORS['reset']}\n")
