@@ -397,6 +397,26 @@ class PomodoroTimer:
         self.timer_thread = threading.Thread(target=self.timer_loop, daemon=True)
         self.timer_thread.start()
     
+    
+    def open_settings(self):
+        print('
+' + '★'*15)
+        print('🛠️ KIRBY CONFIG [A]')
+        print('★'*15)
+        print(f'[1] Hydration Interval (Current: 10m)')
+        print(f'[2] Kirby Mood: {self.mood if hasattr(self, "mood") else "Hype"}')
+        print(f'[3] Reset Session Count')
+        print(f'[4] Exit Settings')
+        
+        choice = input('
+Select: ')
+        if choice == '1':
+            self.remind_interval = input('Enter minutes: ')
+            print(f'<( " )> Interval updated to {self.remind_interval}m!')
+        elif choice == '2':
+            self.mood = 'Calm' if getattr(self, 'mood', 'Hype') == 'Hype' else 'Hype'
+            print(f'<( ^.^ )> Mood switched to {self.mood}!')
+
     def run(self):
         """Main application loop"""
         self.clear_screen()
