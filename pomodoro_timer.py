@@ -19,53 +19,54 @@ DATA_FILE = Path.home() / '.pomodoro_stats.json'
 METERS_PER_MINUTE = 10
 
 # Philosophical Quotes
+
 QUOTES = {
+    'wisdom': [
+        'The journey is the reward.', 'Be like water, my friend.', 'Focus on the step, not the mountain.',
+        'Silence is a source of great strength.', 'He who has a why to live can bear almost any how.'
+    ],
+    'heroic': [
+        'Success is not final, failure is not fatal.', 'Fortune favors the brave.', 'I can do this all day.',
+        'With great power comes great responsibility.', 'Hard times create strong men.'
+    ],
     'iro': [
-        "Pride is not the opposite of shame, but its source. True humility is the only antidote to shame.",
-        "It is important to draw wisdom from many different places. If we take it from only one place, it becomes rigid and stale.",
-        "Perfection and power are overrated. I think you are very wise to choose happiness and love.",
-        "Sometimes life is like this dark tunnel. You can't always see the light at the end of the tunnel, but if you just keep moving, you will come to a better place.",
-        "While it is always best to believe in oneself, a little help from others can be a great blessing.",
-        "You must never give in to despair. Allow yourself to slip down that road, and you surrender to your lowest instincts.",
-        "Protection and power are overrated. I think you are very wise to choose happiness and love.",
-        "Even in the material world, you will find that if you look for the light, you can often find it. But if you look for the dark, that is all you will ever see.",
-        "You have light and peace inside of you. If you let it out, you can change the world around you.",
-        "Understanding yourself is the key to understanding others.",
-        "The best tea tastes delicious whether it comes in a porcelain pot or a tin cup.",
-        "The only way to do great work is to love what you do.",
-        "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-        "Do not go where the path may lead, go instead where there is no path and leave a trail.",
-        "The harder the conflict, the greater the triumph.",
-        "It does not matter how slowly you go as long as you do not stop.",
-        "A hero is someone who has given his or her life to something bigger than oneself.",
-        "I am not afraid of storms, for I am learning how to sail my ship.",
-        "The future belongs to those who believe in the beauty of their dreams.",
-        "Fall seven times, stand up eight.",
-        "I am no bird; and no net ensnares me; I am a free human being with an independent will.",
-        "I would always rather be happy than dignified.",
-        "The soul, fortunately, has an interpreter - often an unconscious but still a faithful interpreter - in the eye.",
-        "I care for myself. The more solitary, the more friendless, the more unsustained I am, the more I will respect myself.",
-        "Life appears to me too short to be spent in nursing animosity or registering wrongs.",
-        "Whatever our souls are made of, his and mine are the same.",
-        "Be with me always—take any form—drive me mad! only do not leave me in this abyss, where I cannot find you!",
-        "He's more myself than I am. Whatever our souls are made of, his and mine are the same.",
-        "We are not rich by what we possess but by what we can do without.",
-        "Science is organized knowledge. Wisdom is organized life.",
-        "He who is cruel to animals becomes hard also in his dealings with men.",
-        "Act only according to that maxim whereby you can at the same time will that it should become a universal law.",
-        "Happiness is not an ideal of reason, but of imagination.",
-        "All our knowledge begins with the senses, proceeds then to the understanding, and ends with reason.",
-        "Two things fill the mind with ever-increasing wonder and awe: the starry heavens above me and the moral law within me.",
-        "Have patience awhile; slanders are not long-lived. Truth is the child of time; erelong she shall appear to vindicate thee.",
-        "What if you fly? - from 'Brave'",
-        "Every little thing is gonna be alright - Three Little Birds",
-        "I get knocked down, but I get up again - Tubthumping",
-        "Don't stop believin' - Journey",
-        "Here comes the sun, and I say it's all right - The Beatles",
-        "I'm still standing better than I ever did - Elton John",
-        "We are the champions, my friends - Queen",
-        "It's my life, it's now or never - Bon Jovi",
-    ]
+        'While it is always best to believe in oneself, a little help can be a blessing.',
+        'Sharing tea with a fascinating stranger is one of lifes true delights.',
+        'Hope is something you give yourself. That is the meaning of inner strength.'
+    ],
+    'bronte': [
+        'I am no bird; and no net ensnares me.', 'I would always rather be happy than dignified.',
+        'The soul that sees beauty may sometimes walk alone.'
+    ],
+    'kant': [
+        'Two things fill the mind with wonder: the starry heavens and the moral law.',
+        'Seek not the favor of the multitude; it is seldom got by honest means.'
+    ],
+    'lyrics': [
+        'MJ: If you want to make the world a better place, take a look at yourself and make a change.',
+        'MJ: Speed demon, minding my own business. Speedin on the highway of life.',
+        'Lana: Will you still love me when I am no longer young and beautiful?',
+        'Lana: Heaven is a place on earth with you.',
+        'Lana: Summertime sadness, I just wanted you to know that baby you are the best.',
+        'Bee Gees: Whether you are a brother or whether you are a mother, you are stayin alive.',
+        'Bee Gees: Night fever, night fever! We know how to do it.',
+        'CAS: I am a dreamer, and you are the dream.',
+        'CAS: K. - I am always thinking of you.',
+        'Billie: I am the bad guy, duh.',
+        'Billie: Ocean eyes - I have never fallen from quite this high.',
+        'Billie: You should see me in a crown.',
+        'Bowie: Ground Control to Major Tom, commencing countdown.'
+    ],
+    'kirby': [
+        '<( " )> Poyo! You are doing amazing, Cosmic Kirbs!',
+        '<( o_o )> Focus mode: MAXIMUM PINK POWER.',
+        '(> ^_^ )> <3 Sending positive vibes to the cockpit!'
+    ],
+    'vibe': [
+        'Main Character Energy detected. 📈', 'No cap, your productivity is skyrocketing.',
+        'Vibe check: ABSOLUTE LEGEND.', 'Big brain moves only.'
+    ],
+    'back': ['Returning to the cockpit...', 'Ready for ignition.', 'Focus mode: Reactivated.']
 }
 
 BREAK_ADVICES = [
@@ -163,7 +164,7 @@ class PomodoroTimer:
             # Random category
             category = random.choice(list(QUOTES.keys()))
         
-        return random.choice(QUOTES.get(category, QUOTES['wisdom']))
+        return random.choice(QUOTES.get(category, QUOTES.get('wisdom', ['Stay focused.'])))
     
     def clear_screen(self):
         """Clear terminal screen"""
