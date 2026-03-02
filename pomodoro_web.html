@@ -24,7 +24,15 @@
 
         #canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
 
-        /* Kirby Float Animation */
+        /* Kirby Dance Animation */
+        @keyframes kirby-dance {
+            0%   { transform: translateY(0) rotate(0deg); }
+            25%  { transform: translateY(-20px) rotate(15deg); }
+            50%  { transform: translateY(0) rotate(0deg) scaleX(-1); }
+            75%  { transform: translateY(-20px) rotate(-15deg); }
+            100% { transform: translateY(0) rotate(0deg) scaleX(1); }
+        }
+
         @keyframes float {
             0% { transform: translateY(0px) rotate(0deg) scale(1); }
             50% { transform: translateY(-20px) rotate(5deg) scale(1.1); }
@@ -251,7 +259,11 @@
                 if(timeLeft > 0) { timeLeft--; updateUI(); }
                 else { 
                     clearInterval(timerId); 
+                    
                     document.getElementById('audioPlayer').play(); 
+                    document.getElementById('kirbySprite').classList.add('dancing');
+                    document.getElementById('kirbySprite').innerText = '<( ^.^ )>';
+ 
                     document.getElementById('kirbySprite').innerText = "<( ^.^ )>";
                     alert("MISSION COMPLETE, COSMIC KIRBS!"); 
                 }
