@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cosmic Kirbs | Dancing Poyo</title>
+    <style>
+        :root { --kirby-pink: #ffafcc; --cosmic-glow: #ff00ff; }
+        body { background: #000; color: #fff; font-family: 'Courier New', monospace; text-align: center; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .glitch { font-size: 1.5rem; text-shadow: 2px 2px var(--kirby-pink); color: var(--kirby-pink); font-weight: bold; margin-bottom: 20px;}
+        
+        /* Kirby Animation container */
+        .kirby-dance { font-size: 3rem; white-space: pre; position: relative;}
+        
+        /* Define keyframes for the classic Kirby dance steps */
+        @keyframes dance {
+            0%   { transform: rotate(0deg)   translateY(0px); }
+            15%  { transform: rotate(10deg)  translateY(-10px); } /* Step Left */
+            30%  { transform: rotate(0deg)   translateY(0px); }
+            45%  { transform: rotate(-10deg) translateY(-10px); } /* Step Right */
+            60%  { transform: rotate(0deg)   translateY(0px); }
+            75%  { transform: rotate(0deg)   translateY(0px) scaleX(-1); } /* Flip Face */
+            90%  { transform: rotate(0deg)   translateY(0px) scaleX(1); } /* Flip Back */
+            100% { transform: rotate(0deg)   translateY(0px); }
+        }
+
+        .step { animation: dance 1.5s infinite linear; display: inline-block;}
+    </style>
+</head>
+<body>
+    <div>
+        <div class="glitch">POYO DANCE MODE</div>
+        <div class="kirby-dance">
+            <span class="step"><( " )></span>
+        </div>
+    </div>
+</body>
+</html>
