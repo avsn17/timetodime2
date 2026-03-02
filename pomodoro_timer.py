@@ -12,7 +12,7 @@ import random
 import json
 from datetime import datetime
 from pathlib import Path
-from tkinter.tix import Meter
+# from tkinter.tix import Meter
 
 # Configuration
 DATA_FILE = Path.home() / '.pomodoro_stats.json'
@@ -95,8 +95,8 @@ COLORS = {
 
 class PomodoroTimer:
     def __init__(self):
-        self.distance_goal = 0 (Meter);
-        self.time_goal = 0 (min);
+        self.distance_goal = 0  # Meter;
+        self.time_goal = 0  # min;
         self.elapsed = 0
         self.running = False
         self.paused = False
