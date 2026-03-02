@@ -5,7 +5,7 @@ from pathlib import Path
 COLORS = {
     "cosmic": "\033[38;5;141m", "solar": "\033[38;5;220m",
     "pink": "\033[38;5;213m", "reset": "\033[0m", "cyan": "\033[36m",
-    "green": "\033[92m", "white": "\033[97m", "void": "\033[90m"
+    "white": "\033[97m", "void": "\033[90m"
 }
 
 QUOTES = {
@@ -37,11 +37,12 @@ class PomodoroTimer:
         star_chars = ['·', '∙', '•', '*', '✧']
         grid = [[' ' for _ in range(width)] for _ in range(height)]
         random.seed(42)
-        for _ in range((width * height) // 20):
+        for _ in range((width * height) // 18):
             x, y = random.randint(0, width-1), random.randint(0, height-1)
             char = random.choice(star_chars)
-            new_x = (x - self.star_offset) % width
-            grid[y][new_x] = f"{COLORS['void']}{char}{COLORS['reset']}"
+            # VERTICAL FALL LOGIC: Shift y instead of x
+            new_y = (y + self.star_offset) % height
+            grid[new_y][x] = f"{COLORS['void']}{char}{COLORS['reset']}"
         return grid
 
     def chat_menu(self):
@@ -57,12 +58,12 @@ class PomodoroTimer:
     def stats_menu(self):
         self.in_menu = True
         self.clear_screen()
-        print(f"{COLORS['solar']}📊 FULL MISSION LOG: {self.user_name.upper()}{COLORS['reset']}")
+        print(f"{COLORS['solar']}📊 MISSION LOG: {self.user_name.upper()}{COLORS['reset']}")
         if self.history_file.exists():
             with open(self.history_file, 'r') as f:
                 history = json.load(f)
-                for entry in history[-15:]:
-                    print(f" {COLORS['green']}√{COLORS['reset']} {entry['timestamp'][:16]} | {entry['duration_mins']}m")
+                for entry in history[-10:]:
+                    print(f" √ {entry['timestamp'][:16]} | {entry['duration_mins']}m")
         input("\nPress Enter...")
         self.in_menu = False
 
@@ -73,16 +74,13 @@ class PomodoroTimer:
         
         grid = self.draw_stars(cols, rows - 2)
         mins, secs = divmod(self.elapsed, 60)
-        
-        # Progress Bar Logic
         progress = min(self.elapsed / (self.goal_mins * 60), 1.0)
         bar_width = cols - 20
         filled = int(bar_width * progress)
         bar = f"[{'█' * filled}{'░' * (bar_width - filled)}]"
 
-        # Text Overlays
         ui_lines = [
-            (1, f" 🛸 MISSION CONTROL | PILOT: {self.user_name} ", COLORS['cosmic']),
+            (1, f" 🚀 FALLING THROUGH THE STARS | PILOT: {self.user_name} ", COLORS['cosmic']),
             (3, f" ⏱️  TIMER: {mins:02d}:{secs:02d} / {self.goal_mins}:00 ", COLORS['solar']),
             (5, f" 🔋 PROGRESS: {bar} {int(progress*100)}% ", COLORS['cyan']),
             (rows-5, f" <( \" )>  *poyo* ", COLORS['pink'])
@@ -90,7 +88,7 @@ class PomodoroTimer:
         
         for r, text, color in ui_lines:
             for i, char in enumerate(text):
-                if i+2 < cols: grid[r][i+2] = f"{color}{char}{COLORS['reset']}"
+                if i+2 < cols and r < rows-2: grid[r][i+2] = f"{color}{char}{COLORS['reset']}"
 
         self.clear_screen()
         for row in grid: print("".join(row))
