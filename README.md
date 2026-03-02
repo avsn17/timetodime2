@@ -5,7 +5,7 @@
 
 ## 🌠 Live Previews
 
-| ![Terminal Preview] (https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWxmcGQyaHRjZXIxYWZ4cmx3aTFrbnBidnFkY2lqYmNsdmo4ZjRqMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/ulUbC9aP9O8GAii3DY/giphy.gif)
+![ (https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZG1wMDlleDk4OTlraTF5dWhrdWNuZmZxMW04ZmpoMGNxNTR1NXlsaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/R5dspTNJBVL51hiSN7/giphy.gif) ](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZG1wMDlleDk4OTlraTF5dWhrdWNuZmZxMW04ZmpoMGNxNTR1NXlsaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/R5dspTNJBVL51hiSN7/giphy.gif)
 
 ![Web Preview](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnh5cWkwa29rbnU4Zzh4MnVudmFwbTJ6dmFwNzl2c282a2N3eHd4ZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/RYncCb9oPLtW8/giphy.gif) |
 | *Smooth ASCII animations* | *Interactive Canvas starfield* |
